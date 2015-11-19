@@ -11,19 +11,33 @@ class SimpleResource{
 
 	}
 
+	/* 
+		resources
+		@params
+			name: name resource
+			url:  url
+			controller: controller
+			middleware: middleware
+	*/
+
 	resource(params){
-		this.resources.push(params);
+		let self = this;
+		self.resources.push(params);
 
 
-		if (this.isParentResource(params.name)){
-			this.makeRestParent(params);
+		if (self.isChildResource(params.name)){
+			self.makeRestParent(params);
 		}else{
 
-			this.makeRest(params);
+			self.makeRest(params);
 		}
 
 		return this;
 	}
+
+	/* 
+
+	*/
 
 	makeRest(params) {
 		let self = this;
@@ -50,7 +64,9 @@ class SimpleResource{
 		
 	}
 
-
+	/* 
+		
+	*/
 	makeRestParent(params){
 		let _params = params
 		let nextUrl = '';
@@ -66,6 +82,10 @@ class SimpleResource{
 		this.makeRest(_params);
 	}
 
+
+	/* 
+
+	*/
 
 	buildRestMap(controller,urlBase,urlBaseWithoutParams){
 		let self = this;
@@ -104,6 +124,10 @@ class SimpleResource{
 		});
 	}
 
+	/* 
+
+	*/
+
 	buildMap(paramsMap){
 		let self = this;
 		let handler = self.handler[paramsMap.method];
@@ -118,6 +142,9 @@ class SimpleResource{
 			]);	
 	}
 
+	/* 
+
+	*/
 	buildMembersMap(paramsMember){
 		let self = this;
 		let members = paramsMember.members;
@@ -137,6 +164,10 @@ class SimpleResource{
 			} );
 	}
 
+	/* 
+		
+	*/
+
 	buildCollectionsMap(paramsCollection){
 		let self = this;
 		paramsCollection.collections 
@@ -155,25 +186,38 @@ class SimpleResource{
 			} );
 	}
 
+	/* 
+		default middleware
+	*/
+
 	defaultMiddleware(req,res,next) {
 		return next();
 	}
 
 	
-
-	isParentResource(nameResource){
+	/* 
+		method verify whether the resource is child
+		@nameResource: Resource name
+	*/
+	isChildResource(nameResource){
 		return nameResource.indexOf('.') != -1;
 	}
 
+	/* 
+		method search
+	*/
 	searchResourceWith(column,value){
+		let self = this;
 		let _return = false;
-		this.resources
+		self.resources
 			.forEach( (resource) => {
 				if (resource[column] == value)
 					_return = resource;
 			});
 		return _return;
 	}
+
+	
 }
 
 module.exports = SimpleResource;
