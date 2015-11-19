@@ -13,7 +13,7 @@ experimental ES6 Restful router for express
 'use strict';
  let express = require('express');
  let app = express();
- let SimpleResource = require('./index');
+ let SimpleResource = require('simple-resource');
  
  class NoticesController{
 
