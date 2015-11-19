@@ -26,9 +26,18 @@ class SimpleResource{
 
 		let controller = params.controller;
 		if (params.collections)
-			self.buildCollectionsMap(controller,urlBaseWithoutParams,params.collections);
+			self.buildCollectionsMap({
+				controller: controller,
+				urlBaseWithoutParams: urlBaseWithoutParams,
+				collections: collections
+			});
 		if (params.members)
-			self.buildMembersMap(controller,urlBase,params.members);
+			self.buildMembersMap({
+				controller: controller,
+				urlBase: urlBase,
+				members: params.members
+			});
+
 		self.buildRestMap(controller,urlBase,urlBaseWithoutParams);
 		
 	}
@@ -80,7 +89,11 @@ class SimpleResource{
 			}
 		];
 
-		self.buildCollectionsMap(controller,'',collections);
+		self.buildCollectionsMap({
+			controller: controller,
+			urlBaseWithoutParams: '',
+			collections: collections
+		});
 	}
 
 	buildMap(paramsMap){
@@ -96,34 +109,35 @@ class SimpleResource{
 			]);	
 	}
 
-	buildMembersMap(controller,urlBase,members){
+	buildMembersMap(paramsMember){
 		let self = this;
+		let members = paramsMember.members;
+		let controller = paramsMember.controller;
+		let urlBase = paramsMember.urlBase;
 		members 
 			.forEach( (member) => {
-				if (controller[member.action]){
-					let paramsMap = {
+				if (paramsMember.controller[member.action])
+					self.buildMap({
 						method: member.method,
 						controller: controller,
 						url: urlBase+member.url,
 						action: member.action
-					}
-					self.buildMap(paramsMap);
-				}
+					});
+				
 			} );
 	}
 
-	buildCollectionsMap(controller,urlBaseWithoutParams,collections){
+	buildCollectionsMap(paramsCollection){
 		let self = this;
-		collections 
+		paramsCollection.collections 
 			.forEach( (collection) => {
-				if (controller[collection.action]){
-					let paramsMap = {
+				if (paramsCollection.controller[collection.action]){
+					self.buildMap({
 						method: collection.method,
-						controller: controller,
-						url: urlBaseWithoutParams+collection.url,
+						controller: paramsCollection.controller,
+						url: paramsCollection.urlBaseWithoutParams+collection.url,
 						action: collection.action
-					}
-					self.buildMap(paramsMap);
+					});
 				}
 				
 			} );
