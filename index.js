@@ -51,9 +51,11 @@ module.exports = class SimpleResource{
 	buildRestMap(controller,urlBase,urlBaseWithoutParams){
 		let self = this;
 		controller.index  ? self.handler.get(urlBaseWithoutParams,controller.index) : null;
+		controller.create ? self.handler.create(urlBaseWithoutParams,controller.create) : null;
 		controller.show   ? self.handler.get(urlBase,controller.show) : null;
 		controller.delete ? self.handler.delete(urlBase,controller.delete) : null;
 		controller.update ? self.handler.put(urlBase,controller.update) : null;
+
 	}
 
 
@@ -80,7 +82,7 @@ module.exports = class SimpleResource{
 	}
 
 	searchResourceWith(column,value){
-		var _return = false;
+		let _return = false;
 		this.resources
 			.forEach( (resource) => {
 				if (resource[column] == value)
