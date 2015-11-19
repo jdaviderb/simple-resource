@@ -1,19 +1,27 @@
 'use strict';
 
 class SimpleResource{
-	constructor(expressHandler){
+	constructor(expressHandler,defaultMiddleware){
 		this.handler = expressHandler;
 		this.resources = [];
+		if (defaultMiddleware == null)
+			this.middleware = this.defaultMiddleware;
+		else
+			this.middleware = defaultMiddleware;
+
 	}
 
 	resource(params){
 		this.resources.push(params);
+
+
 		if (this.isParentResource(params.name)){
 			this.makeRestParent(params);
 		}else{
 
 			this.makeRest(params);
 		}
+
 		return this;
 	}
 
@@ -105,6 +113,7 @@ class SimpleResource{
 		handler
 			.apply(self.handler,[
 				url,
+				paramsMap.middleware.bind(controller),
 				action
 			]);	
 	}
@@ -121,7 +130,8 @@ class SimpleResource{
 						method: member.method,
 						controller: controller,
 						url: urlBase+member.url,
-						action: member.action
+						action: member.action,
+						middleware: member.middleware ? member.middleware : self.middleware
 					});
 				
 			} );
@@ -136,11 +146,17 @@ class SimpleResource{
 						method: collection.method,
 						controller: paramsCollection.controller,
 						url: paramsCollection.urlBaseWithoutParams+collection.url,
-						action: collection.action
+						action: collection.action,
+						middleware: collection.middleware ? member.middleware : self.middleware
+
 					});
 				}
 				
 			} );
+	}
+
+	defaultMiddleware(req,res,next) {
+		return next();
 	}
 
 	
