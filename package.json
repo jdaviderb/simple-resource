@@ -1,0 +1,11 @@
+{
+  "name": "simple-resource",
+  "version": "0.0.1",
+  "description": "simple rest route map using es6 and express",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "jdaviderb <jdaviderb@gmail.com>",
+  "license": "ISC"
+}
