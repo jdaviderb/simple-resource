@@ -1,6 +1,6 @@
 'use strict';
 
-module.exports = class SimpleResource{
+class SimpleResource{
 	constructor(expressHandler){
 		this.handler = expressHandler;
 		this.resources = [];
@@ -22,11 +22,13 @@ module.exports = class SimpleResource{
 		let _urlSplit =  params.url.split('/:');
 		let urlBaseWithoutParams = _urlSplit.slice(0,_urlSplit.length -1).join('/:');
 		let urlBase = _urlSplit.join('/:');
+
+
 		let controller = params.controller;
 		if (params.collections)
-			self.buildCollectionMap(controller,urlBaseWithoutParams,params.collections);
+			self.buildCollectionsMap(controller,urlBaseWithoutParams,params.collections);
 		if (params.members)
-			self.buildMemberMap(controller,urlBase,params.members);
+			self.buildMembersMap(controller,urlBase,params.members);
 		self.buildRestMap(controller,urlBase,urlBaseWithoutParams);
 		
 	}
@@ -50,33 +52,85 @@ module.exports = class SimpleResource{
 
 	buildRestMap(controller,urlBase,urlBaseWithoutParams){
 		let self = this;
-		controller.index  ? self.handler.get(urlBaseWithoutParams,controller.index) : null;
-		controller.create ? self.handler.create(urlBaseWithoutParams,controller.create) : null;
-		controller.show   ? self.handler.get(urlBase,controller.show) : null;
-		controller.delete ? self.handler.delete(urlBase,controller.delete) : null;
-		controller.update ? self.handler.put(urlBase,controller.update) : null;
+		let collections = [
+			{
+				url: urlBaseWithoutParams,
+				method: 'get',
+				action: 'index'
+			},
+			{
+				url: urlBaseWithoutParams,
+				method: 'post',
+				action: 'create'
+			},
+			{
+				url: urlBase,
+				method: 'get',
+				action: 'show'
+			},
+			{
+				url: urlBase,
+				method: 'put',
+				action: 'update'
+			},
+			{
+				url: urlBase,
+				method: 'delete',
+				action: 'delete'
+			}
+		];
 
+		self.buildCollectionsMap(controller,'',collections);
 	}
 
+	buildMap(paramsMap){
+		let self = this;
+		let handler = self.handler[paramsMap.method];
+		let url = paramsMap.url;
+		let controller =  paramsMap.controller;
+		let action = controller[paramsMap.action].bind(controller);
+		handler
+			.apply(self.handler,[
+				url,
+				action
+			]);	
+	}
 
-	buildMemberMap(controller,urlBase,members){
+	buildMembersMap(controller,urlBase,members){
 		let self = this;
 		members 
 			.forEach( (member) => {
-				if (controller[member.action])
-					self.handler[member.method](urlBase+member.url,controller[member.action])
+				if (controller[member.action]){
+					let paramsMap = {
+						method: member.method,
+						controller: controller,
+						url: urlBase+member.url,
+						action: member.action
+					}
+					self.buildMap(paramsMap);
+				}
 			} );
 	}
 
-	buildCollectionMap(controller,urlBaseWithoutParams,collections){
+	buildCollectionsMap(controller,urlBaseWithoutParams,collections){
 		let self = this;
 		collections 
 			.forEach( (collection) => {
-				if (controller[collection.action])
-					self.handler[collection.method](urlBaseWithoutParams+collection.url,controller[collection.action])
+				if (controller[collection.action]){
+					let paramsMap = {
+						method: collection.method,
+						controller: controller,
+						url: urlBaseWithoutParams+collection.url,
+						action: collection.action
+					}
+					self.buildMap(paramsMap);
+				}
 				
 			} );
 	}
+
+	
+
 	isParentResource(nameResource){
 		return nameResource.indexOf('.') != -1;
 	}
@@ -91,3 +145,5 @@ module.exports = class SimpleResource{
 		return _return;
 	}
 }
+
+module.exports = SimpleResource;
